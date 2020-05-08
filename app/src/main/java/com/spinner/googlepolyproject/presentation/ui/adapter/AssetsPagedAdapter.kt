@@ -6,12 +6,13 @@ import android.view.ViewGroup
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.spinner.googlepolyproject.R
 import com.spinner.googlepolyproject.data.model.Asset
+import com.spinner.googlepolyproject.presentation.ui.callback.AssetsCallback
+import com.spinner.googlepolyproject.utils.setImage
 import kotlinx.android.synthetic.main.rv_item_asset.view.*
 
-class AssetsPagedAdapter :
+class AssetsPagedAdapter(val listener: AssetsCallback) :
     PagedListAdapter<Asset, AssetsPagedAdapter.AssetViewHolder>(ASSET_COMPARATOR) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AssetViewHolder {
@@ -22,7 +23,10 @@ class AssetsPagedAdapter :
 
     override fun onBindViewHolder(holder: AssetViewHolder, position: Int) {
         val asset = getItem(position)
-        asset?.let { holder.bind(it) }
+        asset?.let {
+            holder.bind(it)
+            holder.itemView.setOnClickListener { listener.onAssetClicked(asset, holder) }
+        }
     }
 
     class AssetViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -31,12 +35,12 @@ class AssetsPagedAdapter :
         private val tvAuthorName = view.tvAuthorName
 
         fun bind(asset: Asset) {
-            Glide.with(ivThumbnail.context)
-                .load(asset.thumbnail.url)
-                .into(ivThumbnail)
-
+            ivThumbnail.setImage(asset.thumbnail.url)
+            ivThumbnail.transitionName = asset.thumbnail.url
             tvDisplayName.text = asset.displayName
+            tvDisplayName.transitionName = asset.displayName
             tvAuthorName.text = asset.authorName
+            tvAuthorName.transitionName = asset.authorName
         }
     }
 
